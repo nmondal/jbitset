@@ -1,8 +1,8 @@
 package jbitset
 
-class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
+const val noOfBitsInLong = 64
 
-    private val noOfBitsInLong = 64
+class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
 
     internal var array = from?.copyOf() ?: Array<Long>(arraySize) { 0 }
 
@@ -19,7 +19,11 @@ class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
         val i = (inx / noOfBitsInLong).toInt()
         val offset = inx % noOfBitsInLong
         val mask = 1L shl (noOfBitsInLong - offset).toInt()
-        array[i] = array[i] or mask
+        if ( value ) {
+            array[i] = array[i] or mask
+        } else {
+            array[i] = array[i] and mask.inv()
+        }
     }
 
     override fun isSuperSetOf(other: BitSet<Long>) = when {
@@ -38,11 +42,13 @@ class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
 
     private fun union(that: BitSet<Long>, holderInit : () -> Array<Long>) : Array<Long> {
         return checkedRun( that , holderInit ){ other, holder ->
-            array.indices.parallelForEach { holder[it] = array[it] or other.array[it] }
+            array.indices.parallelForEach {
+                holder[it] = array[it] or other.array[it]
+            }
         }
     }
 
-    override fun union(other: BitSet<Long>) = BitBuffer(from = union(other) { Array<Long>(array.size) { 0 } })
+    override fun union(other: BitSet<Long>) = BitBuffer(from = union(other) { Array(array.size) { 0 } })
 
     override fun mutableUnion(other: BitSet<Long>) { union(other){ array } }
 
@@ -74,4 +80,9 @@ class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
     }
 
     override fun hashCode() = array.contentHashCode()
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override fun toString(): String {
+        return array.indices.joinToString("") { array[it].toUInt().toString(radix = 2) }
+    }
 }

@@ -10,15 +10,19 @@ class ThreadedTask : Thread() {
         runLoop = false
     }
     fun add(task: () -> Unit) {
-        synchronized(task) {
+        synchronized(this) {
             workQueue.add(task)
         }
     }
 
     override fun run() {
-        while ( runLoop ) {
-            val task = workQueue.poll()
+        while ( true ) {
+            val task = synchronized(this){ workQueue.poll() }
             task?.invoke()
+            if (!runLoop ) {
+                val isEmpty = synchronized(this){ workQueue.isEmpty() }
+                if ( isEmpty ) break
+            }
         }
     }
 }
