@@ -172,4 +172,41 @@ class BitBufferTest {
         Assert.assertFalse( bb2.isSubSetOf(bb1) )
 
     }
+
+    @Test
+    fun testMinus(){
+        // for all of these bb2 is null set or empty set
+        bb1[0] = true
+        var bbm = bb1.minus(bb2)
+        Assert.assertEquals( bb1, bbm )
+        bbm = bb2.minus(bb1)
+        Assert.assertEquals( bb2, bbm )
+        bbm = bb1.minus(bb1)
+        Assert.assertEquals( bb2, bbm )
+        // now intersection is to be subtracted
+        val leftOverBits = (0 until bb1.size).filter {
+            bb1[it] = true
+            bb2[it] = true
+            var leftOver = false
+            when ( random.nextInt(4) ){
+                0 -> {
+                    bb2[it] = false
+                    leftOver = true
+                }
+                1 -> bb1[it] = false
+                2 -> {
+                    bb1[it] = false
+                    bb2[it] = false
+                }
+
+            }
+            leftOver
+        }.toSet()
+        bbm = bb1.minus(bb2)
+        // this guy must have all common bits, and rest false, yes?
+        (0 until bbm.size).forEach {
+            val shouldBeThere = leftOverBits.contains(it)
+            Assert.assertEquals(shouldBeThere, bbm[it] )
+        }
+    }
 }
