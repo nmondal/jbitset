@@ -8,8 +8,8 @@ import kotlin.test.Test
 class BitBufferTest {
 
     private val random = SecureRandom()
-    lateinit var bb1: BitBuffer
-    lateinit var bb2: BitBuffer
+    private lateinit var bb1: BitSet<Long>
+    private lateinit var bb2: BitSet<Long>
 
     @BeforeTest
     fun setup() {
@@ -130,10 +130,46 @@ class BitBufferTest {
             common
         }.toSet()
         bbi = bb1.intersection(bb2)
-        // this guy must have all bits set apart from skipped bits , yes?
+        // this guy must have all common bits, and rest false, yes?
         (0 until bbi.size).forEach {
             val shouldBeThere = commonBits.contains(it)
             Assert.assertEquals(shouldBeThere, bbi[it] )
         }
+    }
+
+    @Test
+    fun testSetRelations(){
+        // exact same sets
+        bb1[0] = true
+        bb2[0] = true
+        Assert.assertTrue( bb1.isSuperSetOf(bb2) )
+        Assert.assertTrue( bb1.isSubSetOf(bb2) )
+        Assert.assertTrue( bb2.isSuperSetOf(bb1) )
+        Assert.assertTrue( bb2.isSubSetOf(bb1) )
+
+        // one is proper superset
+        bb1[42] = true
+        Assert.assertTrue( bb1.isSuperSetOf(bb2) )
+        Assert.assertFalse( bb2.isSuperSetOf(bb1) )
+        Assert.assertTrue( bb2.isSubSetOf(bb1) )
+
+        // try with empty set
+        val nullSet = BitBuffer()
+        Assert.assertTrue( bb1.isSuperSetOf(nullSet) )
+        Assert.assertTrue( nullSet.isSubSetOf(nullSet) )
+        Assert.assertTrue( nullSet.isSuperSetOf(nullSet) )
+        Assert.assertTrue( nullSet.isSubSetOf(bb1) )
+        Assert.assertTrue( bb2.isSuperSetOf(nullSet) )
+        Assert.assertTrue( nullSet.isSubSetOf(bb2) )
+
+        Assert.assertFalse( nullSet.isSuperSetOf(bb2) )
+        Assert.assertFalse( nullSet.isSuperSetOf(bb1) )
+        // now sets which are not related as subset or super set
+        bb2[1] = true
+        Assert.assertFalse( bb1.isSuperSetOf(bb2) )
+        Assert.assertFalse( bb2.isSuperSetOf(bb1) )
+        Assert.assertFalse( bb1.isSubSetOf(bb2) )
+        Assert.assertFalse( bb2.isSubSetOf(bb1) )
+
     }
 }

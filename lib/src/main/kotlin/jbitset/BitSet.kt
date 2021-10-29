@@ -1,8 +1,8 @@
 package jbitset
 
 interface BitSet<T : Number> {
-    fun get(inx: T): Boolean
-    fun set(inx: T, value: Boolean)
+    operator fun get(inx: T): Boolean
+    operator fun set(inx: T, value: Boolean)
     fun isSuperSetOf(other: BitSet<T>): Boolean
     fun isSubSetOf(other: BitSet<T>) = other.isSuperSetOf(this)
     fun minus(other: BitSet<T>): BitSet<T>
