@@ -209,4 +209,18 @@ class BitBufferTest {
             Assert.assertEquals(shouldBeThere, bbm[it] )
         }
     }
+
+    @Test
+    fun testMutableOperations(){
+        bb1[0] = true
+        bb1.mutableUnion(bb2)
+        Assert.assertTrue(bb1[0])
+        ( 1 until  bb1.size).forEach {  Assert.assertFalse(bb1[it]) }
+        bb1.mutableMinus(bb2)
+        Assert.assertTrue(bb1[0])
+        ( 1 until  bb1.size).forEach {  Assert.assertFalse(bb1[it]) }
+        bb1.mutableIntersection(bb2)
+        ( 0 until  bb1.size).forEach {  Assert.assertFalse(bb1[it]) }
+
+    }
 }
