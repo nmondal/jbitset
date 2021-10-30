@@ -1,5 +1,6 @@
 package jbitset
 
+import java.util.*
 import kotlin.concurrent.thread
 
 class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf()) : BitSet<Long> {
@@ -8,16 +9,15 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
 
     private val pageSize = 64 * internalBitBufferSize
 
-    private var maxPageNum = 0L
+    private var maxPageNum = pages.keys.maxOrNull() ?:0
 
     override fun get(inx: Long) = pages[inx / pageSize]?.let { it[inx % pageSize] }?:false
 
     private fun gc(pageInx: Long){
         thread {
             pages[pageInx]?.let{ bitBuffer ->
-                val allZeros =  null == bitBuffer.array.indices.parallelFind { bitBuffer.array[it] != 0L  }
-                if ( allZeros ){
-                    synchronized( this ) {
+                if ( bitBuffer.allZero ){
+                    synchronized( pageInx ) {
                         pages.remove(pageInx)
                         if ( pageInx == maxPageNum ){ maxPageNum = pages.keys.maxOrNull() ?:0 }
                     }
@@ -65,11 +65,18 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
 
     private fun minus( that: BitSet<Long>, holderInit :  () -> MutableMap<Long,BitBuffer> ) : MutableMap<Long,BitBuffer>  {
         return checkedRun( that , holderInit ){ other, holder ->
+            val zeroKeys = Collections.synchronizedSet( mutableSetOf<Long>())
             other.pages.entries.parallelForEach { entry  ->
                 holder[entry.key]?.let { bitBuffer ->
-                    holder[entry.key] = bitBuffer.minus( entry.value )
+                    val result = bitBuffer.minus( entry.value )
+                    if ( result.allZero ){
+                        zeroKeys.add(entry.key)
+                    } else {
+                        holder[entry.key] = result
+                    }
                 }
             }
+            holder.keys.toSet().filter { zeroKeys.contains(it) }.forEach { holder.remove(it) }
         }
     }
 
@@ -96,11 +103,17 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
 
     private fun intersection( that: BitSet<Long>, holderInit : () -> MutableMap<Long,BitBuffer> ) : MutableMap<Long,BitBuffer> {
         return checkedRun( that , holderInit ){ other, holder ->
+            val commonKeys = Collections.synchronizedSet( mutableSetOf<Long>())
             other.pages.entries.parallelForEach { entry  ->
                 holder[entry.key]?.let { bitBuffer ->
-                    holder[entry.key] = bitBuffer.intersection( entry.value )
+                    val result = bitBuffer.intersection(entry.value)
+                    if ( !result.allZero ){
+                        commonKeys.add(entry.key)
+                        holder[entry.key] = result
+                    }
                 }
             }
+            holder.keys.toSet().filter { !commonKeys.contains(it) }.forEach { holder.remove(it) }
         }
     }
 
