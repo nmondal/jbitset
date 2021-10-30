@@ -11,6 +11,7 @@ interface BitSet<T : Number> {
     fun mutableMinus(other: BitSet<T>)
     fun mutableUnion(other: BitSet<T>)
     fun mutableIntersection(other: BitSet<T>)
+    fun clearAll()
     val size: Long
 }
 

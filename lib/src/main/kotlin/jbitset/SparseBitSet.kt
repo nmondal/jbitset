@@ -80,9 +80,11 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
     private fun union( that: BitSet<Long>, holderInit : () -> MutableMap<Long,BitBuffer> ) : MutableMap<Long,BitBuffer> {
         return checkedRun( that , holderInit ){ other, holder ->
             other.pages.entries.parallelForEach { entry  ->
-                holder[entry.key]?.let {
-                    holder[entry.key] = holder[entry.key]?.union( entry.value )
-                        ?: BitBuffer(from = entry.value.array.copyOf())
+                holder[entry.key] = if ( holder.containsKey( entry.key ) ){
+                    // need to update the with union
+                    holder[entry.key]!!.union( entry.value )
+                } else { // need to update the with copy
+                    BitBuffer(from = entry.value.array.copyOf())
                 }
             }
         }
@@ -117,4 +119,9 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
     }
 
     override fun hashCode() = pages.hashCode()
+
+    override fun clearAll() {
+        synchronized(this) { pages.clear() }
+        maxPageNum = 0
+    }
 }

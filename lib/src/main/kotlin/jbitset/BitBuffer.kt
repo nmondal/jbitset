@@ -81,6 +81,10 @@ class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
 
     override fun hashCode() = array.contentHashCode()
 
+    override fun clearAll() {
+        array.indices.forEach { array[it] = 0 }
+    }
+
     @OptIn(ExperimentalUnsignedTypes::class)
     override fun toString(): String {
         return array.indices.joinToString("") { array[it].toUInt().toString(radix = 2) }

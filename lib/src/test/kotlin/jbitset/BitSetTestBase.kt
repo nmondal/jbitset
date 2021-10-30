@@ -3,9 +3,10 @@ package jbitset
 import org.junit.Assert
 import org.junit.Before
 import java.security.SecureRandom
+import kotlin.math.absoluteValue
 
 abstract class BitSetTestBase {
-    private val random = SecureRandom()
+    protected val random = SecureRandom()
     lateinit var bb1: BitSet<Long>
     lateinit var bb2: BitSet<Long>
 
@@ -42,7 +43,7 @@ abstract class BitSetTestBase {
     private fun setupSetOp(maxSize: Long, setOp: SetOp) : Set<Long> {
         // ensure actual are pretty less in numbers
        return (0 until maxSize).filter {
-           val res = random.nextInt(1000)
+           val res = random.nextInt(1000).absoluteValue
            bb1[it] = false
            bb2[it] = false
            val bb1Set = res < 100
