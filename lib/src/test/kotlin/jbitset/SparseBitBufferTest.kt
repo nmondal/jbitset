@@ -1,13 +1,14 @@
 package jbitset
 
-import org.junit.Assert
 import org.junit.Test
 
-class SparseBitBufferTest {
+class SparseBitBufferTest : BitSetTestBase(){
+
+    override fun bitSetImpl() = SparseBitSet()
+
     @Test
-    fun testBasicSparseBitBuffer(){
-        val sb1 = SparseBitSet()
-        val sb2 = SparseBitSet()
-        Assert.assertEquals(sb1, sb2 )
+    fun testGetAndSet() {
+        val inx2 = 1000000L
+        getAndSetTest( 0, inx2, inx2+1)
     }
 }

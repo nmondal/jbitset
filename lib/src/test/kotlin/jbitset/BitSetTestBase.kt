@@ -61,8 +61,8 @@ abstract class BitSetTestBase {
         bb1[inx1] = true
         bb1[inx2] = true
         val onInx = (0 until size).filter { bb1[it] }
-        Assert.assertEquals(0, onInx.first())
-        Assert.assertEquals(42, onInx.last())
+        Assert.assertEquals(inx1, onInx.first())
+        Assert.assertEquals(inx2, onInx.last())
         bb1[inx1] = false
         bb1[inx2] = false
         Assert.assertFalse(bb1[inx1])
@@ -149,7 +149,7 @@ abstract class BitSetTestBase {
         Assert.assertTrue( bb2.isSubSetOf(bb1) )
 
         // try with empty set
-        val nullSet = BitBuffer()
+        val nullSet = bitSetImpl()
         Assert.assertTrue( bb1.isSuperSetOf(nullSet) )
         Assert.assertTrue( nullSet.isSubSetOf(nullSet) )
         Assert.assertTrue( nullSet.isSuperSetOf(nullSet) )
