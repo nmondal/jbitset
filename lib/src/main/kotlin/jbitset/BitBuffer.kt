@@ -88,6 +88,18 @@ class BitBuffer(arraySize: Int = 64, from: Array<Long>? = null) : BitSet<Long> {
     val allZero: Boolean
         get() = null == array.indices.parallelFind { array[it] != 0L  }
 
+
+    override fun indices(): Iterator<Long> {
+        return object : Iterator<Long> {
+            var inx = -1L
+            override fun hasNext(): Boolean {
+                while ( ++inx < size && !get(inx) );
+                return inx != size
+            }
+            override fun next() = inx
+        }
+    }
+
     @OptIn(ExperimentalUnsignedTypes::class)
     override fun toString(): String {
         return array.indices.joinToString("") { array[it].toUInt().toString(radix = 2) }

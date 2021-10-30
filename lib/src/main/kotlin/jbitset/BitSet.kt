@@ -13,5 +13,6 @@ interface BitSet<T : Number> {
     fun mutableIntersection(other: BitSet<T>)
     fun clearAll()
     val size: Long
+    fun indices() : Iterator<T>
 }
 

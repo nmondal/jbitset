@@ -7,7 +7,7 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
 
     private val internalBitBufferSize = 64
 
-    private val pageSize = 64 * internalBitBufferSize
+    private val pageSize = 64L * internalBitBufferSize
 
     private var maxPageNum = pages.keys.maxOrNull() ?:0
 
@@ -139,5 +139,31 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
     override fun clearAll() {
         synchronized(this) { pages.clear() }
         maxPageNum = 0
+    }
+
+    override fun indices(): Iterator<Long> {
+        if ( pages.isEmpty() ) return emptyList<Long>().iterator()
+        return object : Iterator<Long> {
+
+            val sortedKeys = pages.keys.sorted()
+            var pageInx = 0
+            var curOffSet = -1L
+            val curKey : Long
+                get() = sortedKeys[pageInx]
+
+            override fun hasNext(): Boolean {
+                while ( pageInx < sortedKeys.size ){
+                    while ((++curOffSet < pageSize) && !pages[curKey]!![curOffSet]);
+                    if (curOffSet != pageSize ){
+                        return true
+                    }
+                    curOffSet = 0
+                    pageInx++
+                }
+                curOffSet = -1 // sanitize next()
+                return false
+            }
+            override fun next() = curKey * pageSize + curOffSet
+        }
     }
 }
