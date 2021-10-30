@@ -1,21 +1,11 @@
 package jbitset
 
 import org.junit.Assert
-import java.security.SecureRandom
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class BitBufferTest {
+class BitBufferTest : BitSetTestBase() {
 
-    private val random = SecureRandom()
-    private lateinit var bb1: BitSet<Long>
-    private lateinit var bb2: BitSet<Long>
-
-    @BeforeTest
-    fun setup() {
-        bb1 = BitBuffer()
-        bb2 = BitBuffer()
-    }
+    override fun bitSetImpl() = BitBuffer()
 
     @Test
     fun testGetAndSet() {
@@ -221,6 +211,5 @@ class BitBufferTest {
         ( 1 until  bb1.size).forEach {  Assert.assertFalse(bb1[it]) }
         bb1.mutableIntersection(bb2)
         ( 0 until  bb1.size).forEach {  Assert.assertFalse(bb1[it]) }
-
     }
 }
