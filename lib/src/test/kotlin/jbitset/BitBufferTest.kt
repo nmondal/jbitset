@@ -23,12 +23,12 @@ class BitBufferTest : BitSetTestBase() {
 
     @Test
     fun testIntersection(){
-        intersectionTest(bb1.size)
+        intersectionTest(0, 42, bb1.size)
     }
 
     @Test
     fun testSetRelations(){
-        relationsTest()
+        relationsTest(0, 42, 1 )
     }
 
     @Test
