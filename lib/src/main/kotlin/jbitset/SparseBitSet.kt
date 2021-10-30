@@ -60,6 +60,9 @@ class SparseBitSet(private var pages : MutableMap<Long,BitBuffer> = mutableMapOf
         if ( that !is SparseBitSet  ) throw IllegalArgumentException()
         val holder = holderInit()
         runOperation( that, holder)
+        if ( holder === pages ){ // self modification
+            maxPageNum = pages.keys.maxOrNull() ?:0
+        }
         return holder
     }
 
