@@ -11,4 +11,9 @@ class SparseBitBufferTest : BitSetTestBase(){
         val inx2 = 1000000L
         getAndSetTest( 0, inx2, inx2+1)
     }
+
+    @Test
+    fun testEquality() {
+        equalityTest(0,1000000,100000)
+    }
 }
